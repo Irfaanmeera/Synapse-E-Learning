@@ -17,7 +17,7 @@ const chatRepository = new chatRepository_1.ChatRepository();
 const httpServer = (0, http_1.createServer)();
 const io = new socket_io_1.Server(httpServer, {
     cors: {
-        origin: "http://localhost:5173",
+        origin: "hhttps://synapse-e-learning.vercel.app",
         methods: ["GET", "POST"],
         credentials: true,
     },
