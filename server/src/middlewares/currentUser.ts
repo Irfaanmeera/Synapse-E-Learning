@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { generateToken } from '../utils/generateJWT';
@@ -27,7 +28,7 @@ export const isUserAuth = async (req: Request, res: Response, next: NextFunction
       }
     } catch (error) {
 
-      if (error.name === "TokenExpiredError" && refreshTokenHeader) {
+      if ((error as Error).name === "TokenExpiredError" && refreshTokenHeader) {
         const refreshToken = refreshTokenHeader as string;
         try {
           const refreshDecoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET!) as JwtPayload | string;

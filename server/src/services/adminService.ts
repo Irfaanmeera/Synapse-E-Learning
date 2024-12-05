@@ -65,10 +65,11 @@ export class AdminService implements IAdminService {
       throw new ErrorHandler("Error adding category", STATUS_CODES.INTERNAL_SERVER_ERROR);
     }
   }
+  
 
   async editCategory(categoryId: string, data: { category: string }): Promise<ICategory> {
     try {
-      return await this.categoryRepository.updateCategory(categoryId, data);
+      return await this.categoryRepository.updateCategory(categoryId, data.category);
     } catch (error) {
       console.error(error);
       throw new ErrorHandler("Error editing category", STATUS_CODES.INTERNAL_SERVER_ERROR);

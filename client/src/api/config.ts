@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosError } from "axios";
 import toast from "react-hot-toast";
 
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = "https://synapselms.online";
 
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: BASE_URL,

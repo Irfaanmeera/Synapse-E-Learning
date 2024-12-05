@@ -26,7 +26,7 @@ export interface IAdminService{
     login(email:string): Promise <IAdmin>
     getAllCategories(): Promise<ICategory[] | null>;
     addCategory(category: string): Promise<ICategory | null>;
-    editCategory(categoryId: string, data: string): Promise<ICategory>;
+    editCategory(categoryId: string, data: {category:string} ): Promise<ICategory>;
     listCategory(categoryId: string): Promise<ICategory>;
     unlistCategory(categoryId: string): Promise<ICategory>;
     getAllStudents(): Promise<IStudent[] | null>;

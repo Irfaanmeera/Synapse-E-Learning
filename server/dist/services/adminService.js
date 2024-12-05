@@ -68,7 +68,7 @@ class AdminService {
     editCategory(categoryId, data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                return yield this.categoryRepository.updateCategory(categoryId, data);
+                return yield this.categoryRepository.updateCategory(categoryId, data.category);
             }
             catch (error) {
                 console.error(error);
