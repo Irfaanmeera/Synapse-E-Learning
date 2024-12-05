@@ -27,7 +27,7 @@ const SingleEnrolledCourse = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
-    const socketIo = io("http://localhost:4000");
+    const socketIo = io("https://www.synapselms.online");
     setSocket(socketIo);
     return () => {
       socketIo.disconnect();
