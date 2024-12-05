@@ -17,7 +17,7 @@ const chatRepository = new chatRepository_1.ChatRepository();
 const httpServer = (0, http_1.createServer)();
 const io = new socket_io_1.Server(httpServer, {
     cors: {
-        origin: "hhttps://synapse-e-learning.vercel.app",
+        origin: "https://synapse-e-learning.vercel.app",
         methods: ["GET", "POST"],
         credentials: true,
     },
@@ -82,3 +82,6 @@ const emitEvent = (eventData) => {
     io.emit(eventData.event, eventData.data);
 };
 exports.emitEvent = emitEvent;
+httpServer.listen(4000, () => {
+    console.log("Socket.IO listening on *:4000");
+});
