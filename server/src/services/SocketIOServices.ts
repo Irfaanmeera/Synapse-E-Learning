@@ -23,7 +23,7 @@ interface EventData {
 const httpServer = createServer();
 const io = new Server(httpServer, {
   cors: {
-    origin: "hhttps://synapse-e-learning.vercel.app",
+    origin: "https://synapse-e-learning.vercel.app",
     methods: ["GET", "POST"],
     credentials: true,
   },
