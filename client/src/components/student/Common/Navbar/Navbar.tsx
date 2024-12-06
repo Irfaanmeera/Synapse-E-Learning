@@ -98,7 +98,7 @@ const Navbar = () => {
                 type="text"
                 placeholder="Search Courses..."
                 ref={searchInputRef}
-                className="w-50 sm:w-30 md:w-60 lg:w-100 sm:pl-2 lg:pl-4 py-3 focus:outline-none border-none rounded-l-3xl"
+                className="w-50 sm:w-30 md:w-60 lg:w-100 sm:pl-1 lg:pl-4 py-3 focus:outline-none border-none rounded-l-3xl"
               />
               <button
                 type="submit"
