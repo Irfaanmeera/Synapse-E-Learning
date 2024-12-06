@@ -8,10 +8,10 @@ import { userActions } from "../../redux/userSlice";
 import { googleLogin } from "../../api/authentication";
 
 type Props = {
-  setError: (error: string) => void;
+  setError?: (error: string) => void; // Make optional with a default fallback
 };
 
-const Oauth: React.FC<Props> = ({ setError }) => {
+const Oauth: React.FC<Props> = ({ setError = console.error }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const auth = getAuth(app);
@@ -31,20 +31,16 @@ const Oauth: React.FC<Props> = ({ setError }) => {
         const name = resultsFromGoogle.user.displayName;
         const email = resultsFromGoogle.user.email;
         const image = resultsFromGoogle.user.photoURL;
-        
-      
+
         const response = await googleLogin(name, email, image);
-        console.log(response);
 
         if (response?.data.success) {
           const userDetails = response.data.student;
-          console.log(userDetails);
 
           dispatch(userActions.saveUser(userDetails));
-
           localStorage.setItem("user", JSON.stringify(userDetails));
           localStorage.setItem("token", response.data.token);
-          localStorage.setItem("refreshToken", response.data.resfreshToken);
+          localStorage.setItem("refreshToken", response.data.refreshToken);
 
           navigate("/");
         } else {
