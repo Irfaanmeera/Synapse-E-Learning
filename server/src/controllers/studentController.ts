@@ -62,6 +62,7 @@ export class StudentController {
         const student: IStudent = await this.studentService.verifyStudent(
           email
         );
+        
         if (!student || !student.id) {
           throw new Error("Student or Student ID is missing.");
         }
