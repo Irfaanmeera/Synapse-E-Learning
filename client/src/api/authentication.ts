@@ -75,25 +75,6 @@ const studentLogin = async (studentData: User) => {
   }
 };
 
-// const googleLogin = async (
-//   name: string | null,
-//   email: string | null,
-//   photoUrl: string | null
-// ) => {
-//   try {
-//     if (!name || !email) return;
-//     const result = await axiosInstance.post("/google-login", {
-//       name,
-//       email,
-//       photoUrl,
-//     });
-//     console.log("Result:", result);
-//     return result;
-//   } catch (error) {
-//     console.error("Error occurred:", error);
-//     console.log("Error coming from here...");
-//   }
-// };
 const googleLogin = async (
   name: string | null,
   email: string | null,
@@ -101,25 +82,15 @@ const googleLogin = async (
 ) => {
   try {
     if (!name || !email) return;
-
     const result = await axiosInstance.post("/google-login", {
       name,
       email,
       photoUrl,
     });
-
-    // Extract tokens and student data from the response
-    const { token, refreshToken, student } = result.data;
-    
-    // Store tokens in local storage
-    localStorage.setItem("token", token);
-    localStorage.setItem("refreshToken", refreshToken);
-
-    console.log("Google login successful:", student);
-
-    return student;
+    console.log("Result:", result);
+    return result;
   } catch (error) {
-    console.error("Error during Google login:", error);
+    console.error("Error occurred:", error);
     console.log("Error coming from here...");
   }
 };
