@@ -87,8 +87,14 @@ const googleLogin = async (
       email,
       photoUrl,
     });
+    const { token, refreshToken, student } = result.data;
+    
+    console.log("Student data", student)
+    localStorage.setItem("token", token);
+    localStorage.setItem("refreshToken", refreshToken);
     console.log("Result:", result);
-    return result;
+    return student;
+   
   } catch (error) {
     console.error("Error occurred:", error);
     console.log("Error coming from here...");
