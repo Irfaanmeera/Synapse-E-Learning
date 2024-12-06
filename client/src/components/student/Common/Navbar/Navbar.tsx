@@ -150,7 +150,7 @@ const Navbar = () => {
 
             {/* USER SECTION */}
             {user ? (
-              <div className="relative hidden lg:flex items-center space-x-3">
+              <div className="relative  items-center space-x-3">
                 {/* User name */}
                 <Typography
                   as="div"

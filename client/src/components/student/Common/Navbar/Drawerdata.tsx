@@ -15,6 +15,15 @@ const navigation: NavigationItem[] = [
   { name: "Courses", href: "/courses", current: false },
   { name: "Profile", href: "/profile", current: false },
 ];
+const handleLogout = () => {
+  dispatch(userActions.userLogout());
+  if (user?.role === Roles.student) {
+    navigate("/");
+    toast.success("Logged Out Successfully");
+  } else {
+    navigate("/");
+  }
+};
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
