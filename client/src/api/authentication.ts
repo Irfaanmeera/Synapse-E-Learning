@@ -96,8 +96,8 @@ const googleLogin = async (
     return student;
    
   } catch (error) {
-    console.error("Error occurred:", error);
-    console.log("Error coming from here...");
+    console.error("Error during login:", error);
+    return handleAxiosError(error);
   }
 };
 
