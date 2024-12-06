@@ -84,7 +84,7 @@ const Navbar = () => {
         <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8 shadow-4 ">
           <div className="relative flex h-16 items-center justify-between my-1">
             {/* LOGO */}
-            <div className="flex items-center">
+            <div className="hidden lg:flex items-center">
   <div className="flex-shrink-0 px-3 text-ultramarine font-bold font-serif">
     <p className="text-xl lg:text-2xl">SYNAPSE</p>
   </div>
