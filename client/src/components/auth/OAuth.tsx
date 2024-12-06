@@ -31,7 +31,8 @@ const Oauth: React.FC<Props> = ({ setError }) => {
         const name = resultsFromGoogle.user.displayName;
         const email = resultsFromGoogle.user.email;
         const image = resultsFromGoogle.user.photoURL;
-
+        
+        dispatch(userActions.setEmail(user.email));
         const response = await googleLogin(name, email, image);
         console.log(response);
 
@@ -42,7 +43,8 @@ const Oauth: React.FC<Props> = ({ setError }) => {
           dispatch(userActions.saveUser(userDetails));
 
           localStorage.setItem("user", JSON.stringify(userDetails));
-          localStorage.setItem("accessToken", response.data.token);
+          localStorage.setItem("token", response.data.token);
+          localStorage.setItem("refreshToken", response.data.resfreshToken);
 
           navigate("/");
         } else {
