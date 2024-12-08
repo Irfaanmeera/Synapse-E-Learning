@@ -1,14 +1,6 @@
 import ErrorHandler from "../utils/ErrorHandler";
 import { IAdminService } from "../interfaces/serviceInterfaces/IAdminService";
 import { STATUS_CODES } from "../constants/httpStatusCodes";
-import {
-  CategoryRepository,
-  InstructorRepository,
-  CourseRepository,
-  EnrolledCourseRepository,
-  StudentRepository,
-  AdminRepository,
-} from "../repositories";
 import { BadRequestError } from "../constants/errors/badrequestError";
 import {
   ICategory,
@@ -21,15 +13,16 @@ import {
   AdminDashboardData,
   FetchSalesDataResponse,
 } from "../interfaces/entityInterface";
+import { IAdminRepository,ICategoryRepository,IStudentRepository,IInstructorRepository,ICourseRepository,IEnrolledCourseRepository } from "../interfaces/repositoryInterfaces"; 
 
 export class AdminService implements IAdminService {
   constructor(
-    private adminRepository: AdminRepository,
-    private categoryRepository: CategoryRepository,
-    private studentRepository: StudentRepository,
-    private instructorRepository: InstructorRepository,
-    private courseRepository: CourseRepository,
-    private enrolledCourseRepository: EnrolledCourseRepository
+    private adminRepository: IAdminRepository,
+    private categoryRepository: ICategoryRepository,
+    private studentRepository: IStudentRepository,
+    private instructorRepository: IInstructorRepository,
+    private courseRepository: ICourseRepository,
+    private enrolledCourseRepository: IEnrolledCourseRepository
   ) { }
 
   async login(email: string): Promise<IAdmin> {
@@ -114,40 +107,65 @@ export class AdminService implements IAdminService {
 
   async blockStudent(studentId: string): Promise<IStudent> {
     try {
-      return await this.studentRepository.blockStudent(studentId);
+      const student = await this.studentRepository.blockStudent(studentId);
+  
+      if (!student) {
+        throw new ErrorHandler("Student not found", STATUS_CODES.NOT_FOUND);
+      }
+  
+      return student;
     } catch (error) {
       console.error(error);
       throw new ErrorHandler("Error blocking student", STATUS_CODES.INTERNAL_SERVER_ERROR);
     }
   }
+  
 
   async unblockStudent(studentId: string): Promise<IStudent> {
     try {
-      return await this.studentRepository.unblockStudent(studentId);
+      const student = await this.studentRepository.unblockStudent(studentId);
+  
+      if (!student) {
+        throw new ErrorHandler("Student not found", STATUS_CODES.NOT_FOUND);
+      }
+  
+      return student;
     } catch (error) {
       console.error(error);
       throw new ErrorHandler("Error unblocking student", STATUS_CODES.INTERNAL_SERVER_ERROR);
     }
   }
+  
 
   async blockInstructor(instructorId: string): Promise<IInstructor> {
     try {
-      return await this.instructorRepository.blockInstructor(instructorId);
+      const instructor = await this.instructorRepository.blockInstructor(instructorId);
+  
+      if (!instructor) {
+        throw new ErrorHandler("Instructor not found", STATUS_CODES.NOT_FOUND);
+      }
+  
+      return instructor;
     } catch (error) {
       console.error(error);
       throw new ErrorHandler("Error blocking instructor", STATUS_CODES.INTERNAL_SERVER_ERROR);
     }
   }
-
   async unblockInstructor(instructorId: string): Promise<IInstructor> {
     try {
-      return await this.instructorRepository.unblockInstructor(instructorId);
+      const instructor = await this.instructorRepository.unblockInstructor(instructorId);
+  
+      if (!instructor) {
+        throw new ErrorHandler("Instructor not found", STATUS_CODES.NOT_FOUND);
+      }
+  
+      return instructor;
     } catch (error) {
       console.error(error);
       throw new ErrorHandler("Error unblocking instructor", STATUS_CODES.INTERNAL_SERVER_ERROR);
     }
   }
-
+    
   async getAllCourses(): Promise<ICourse[]> {
     try {
       return await this.courseRepository.getCourseByAdmin();

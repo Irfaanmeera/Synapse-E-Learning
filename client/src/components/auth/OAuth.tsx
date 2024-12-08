@@ -32,6 +32,7 @@ const Oauth: React.FC<Props> = ({ setError = console.error }) => {
         const email = resultsFromGoogle.user.email;
         const image = resultsFromGoogle.user.photoURL;
 
+        dispatch(userActions.setEmail(email));
         const response = await googleLogin(name, email, image);
 
         if (response?.data.success) {

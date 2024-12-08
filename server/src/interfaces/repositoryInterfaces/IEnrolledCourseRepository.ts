@@ -1,3 +1,4 @@
+import { SalesDataPoint } from "../entityInterface";
 import { IEnrolledCourse } from "../entityInterface/IEnrolledCourse";
 
 
@@ -13,4 +14,5 @@ export interface IEnrolledCourseRepository {
     addModuleToProgression(enrolledId: string,chapterTitle: string): Promise<IEnrolledCourse>;
     completedStatus(enrolledId: string): Promise<void>;
     getTotalRevenue(): Promise<number>;
+    getRevenueData(filter: "weekly" | "monthly" | "yearly"): Promise<SalesDataPoint[]>;
 }
