@@ -1,16 +1,8 @@
 import { IStudentService } from "../interfaces/serviceInterfaces/IStudentService";
 import { BadRequestError } from "../constants/errors/badrequestError";
-import s3 from "../config/aws.config";
+import s3 from "../config/awsS3.config";
 import { PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { ICourse, ISearch } from "../interfaces/entityInterface/ICourse";
-import {
-  CourseRepository,
-  CategoryRepository,
-  InstructorRepository,
-  EnrolledCourseRepository,
-  ModuleRepository,
-  StudentRepository,
-} from "../repositories";
 import {
   ICategory,
   IStudent,
@@ -18,18 +10,19 @@ import {
 } from "../interfaces/entityInterface";
 import { NotFoundError } from "../constants/errors/notFoundError";
 import Stripe from "stripe";
+import { ICategoryRepository, ICourseRepository, IEnrolledCourseRepository, IInstructorRepository, IModuleRepository, IStudentRepository } from "../interfaces/repositoryInterfaces";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 const INSTRUCTOR_PERCENTAGE = 70;
 
 export class StudentService implements IStudentService {
   constructor(
-    private studentRepository: StudentRepository,
-    private instructorRepository: InstructorRepository,
-    private courseRepository: CourseRepository,
-    private categoryRepository: CategoryRepository,
-    private moduleRepository: ModuleRepository,
-    private enrolledCourseRepository: EnrolledCourseRepository
+    private studentRepository: IStudentRepository,
+    private instructorRepository: IInstructorRepository,
+    private courseRepository: ICourseRepository,
+    private categoryRepository: ICategoryRepository,
+    private moduleRepository: IModuleRepository,
+    private enrolledCourseRepository: IEnrolledCourseRepository
   ) { }
 
   async signup(studentDetails: IStudent): Promise<IStudent | null> {
@@ -165,18 +158,22 @@ export class StudentService implements IStudentService {
       if (!categoryId) {
         throw new Error("Category ID is required");
       }
-
       const result = await this.courseRepository.getCoursesByCategory(
         categoryId,
         page,
         limit
       );
+      if (!result) {
+        return { courses: [], total: 0 };
+      }
+  
       return result;
     } catch (error) {
       console.error(error);
       throw new Error("An error occurred while fetching courses by category");
     }
   }
+  
 
   async getAllCategories(): Promise<ICategory[] | null> {
     try {
@@ -216,25 +213,28 @@ export class StudentService implements IStudentService {
       throw new Error("An error occurred while searching for courses");
     }
   }
-
   async updatePassword(studentId: string, password: string): Promise<IStudent> {
     try {
       const updatedStudent = await this.studentRepository.udpatePassword(
         studentId,
         password
       );
+      if (!updatedStudent) {
+        throw new Error("Password update failed. Student not found.");
+      }
       return updatedStudent;
     } catch (error) {
       console.error(error);
       throw new Error("An error occurred while updating the password");
     }
   }
-
+  
   async resetForgotPassword(
     email: string,
     password: string
   ): Promise<IStudent> {
     try {
+      // Find the student by email
       const student = await this.studentRepository.findStudentByEmail(email);
       if (!student) {
         throw new BadRequestError("Student not found");
@@ -243,15 +243,21 @@ export class StudentService implements IStudentService {
         student.id!,
         password
       );
+      if (!updatedStudent) {
+        throw new Error("Failed to update password. Please try again.");
+      }
+  
       return updatedStudent;
     } catch (error) {
       console.error(error);
+
       if (error instanceof BadRequestError) {
         throw error;
       }
       throw new Error("An error occurred while resetting the password");
     }
   }
+  
 
   async stripePayment(courseId: string, studentId: string): Promise<string> {
     try {

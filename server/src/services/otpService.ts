@@ -1,14 +1,13 @@
 import { IOtp } from "../interfaces/entityInterface/IOtp";
-import { OtpRepository } from "../repositories/otpRepository";
 import { IOtpService } from '../interfaces/serviceInterfaces/IOtpService'
 import otpGenerator from 'otp-generator'
 import nodemailer from 'nodemailer'
+import { IOtpRepository } from "../interfaces/repositoryInterfaces";
 
 export class OtpService implements IOtpService {
-  private otpRepository: OtpRepository;
-  constructor() {
-    this.otpRepository = new OtpRepository()
-  }
+  constructor(
+    private otpRepository: IOtpRepository,
+  ) {}
   async createOtp(otpData: IOtp): Promise<IOtp | undefined> {
     const otp = await this.otpRepository.findOtp(otpData.email)
     if (!otp) {

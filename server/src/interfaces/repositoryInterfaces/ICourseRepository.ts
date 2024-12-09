@@ -3,6 +3,7 @@ import {ICourse, CourseApproval,ISearch } from "../entityInterface/ICourse"
 export interface ICourseRepository {
     createCourse(courseDeatils: ICourse): Promise<ICourse>;
     getAllCourses(page: number): Promise<{ courses: ICourse[]; totalCount: number } | null>;
+    incrementEnrolledCount(courseId: string): Promise<void>;
     getCourseByInstructor(instructorId: string,page: number): Promise<{ courses: ICourse[]; totalCount: number } | null>;
     getSingleCourseForInstructor(courseId: string): Promise<ICourse | null>;
     getCoursesByCategory(categoryId:string,page:number,limit:number): Promise<{courses: ICourse[];total: number;} | null> ;
