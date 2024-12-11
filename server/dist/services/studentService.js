@@ -14,7 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.StudentService = void 0;
 const badrequestError_1 = require("../constants/errors/badrequestError");
-const aws_config_1 = __importDefault(require("../config/aws.config"));
+const awsS3_config_1 = __importDefault(require("../config/awsS3.config"));
 const client_s3_1 = require("@aws-sdk/client-s3");
 const notFoundError_1 = require("../constants/errors/notFoundError");
 const stripe_1 = __importDefault(require("stripe"));
@@ -115,7 +115,7 @@ class StudentService {
                         Bucket: "synapsebucket-aws",
                         Key: `profile-images/${fileName}`,
                     };
-                    yield aws_config_1.default.send(new client_s3_1.DeleteObjectCommand(existingImage));
+                    yield awsS3_config_1.default.send(new client_s3_1.DeleteObjectCommand(existingImage));
                 }
                 const key = `profile-images/${file.originalname}`;
                 const params = {
@@ -125,7 +125,7 @@ class StudentService {
                     ContentType: file.mimetype,
                 };
                 const filePath = `https://${params.Bucket}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${params.Key}`;
-                yield aws_config_1.default.send(new client_s3_1.PutObjectCommand(params));
+                yield awsS3_config_1.default.send(new client_s3_1.PutObjectCommand(params));
                 return yield this.studentRepository.updateImage(studentId, filePath);
             }
             catch (error) {
@@ -153,6 +153,9 @@ class StudentService {
                     throw new Error("Category ID is required");
                 }
                 const result = yield this.courseRepository.getCoursesByCategory(categoryId, page, limit);
+                if (!result) {
+                    return { courses: [], total: 0 };
+                }
                 return result;
             }
             catch (error) {
@@ -203,7 +206,10 @@ class StudentService {
     updatePassword(studentId, password) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const updatedStudent = yield this.studentRepository.udpatePassword(studentId, password);
+                const updatedStudent = yield this.studentRepository.updatePassword(studentId, password);
+                if (!updatedStudent) {
+                    throw new Error("Password update failed. Student not found.");
+                }
                 return updatedStudent;
             }
             catch (error) {
@@ -215,11 +221,15 @@ class StudentService {
     resetForgotPassword(email, password) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                // Find the student by email
                 const student = yield this.studentRepository.findStudentByEmail(email);
                 if (!student) {
                     throw new badrequestError_1.BadRequestError("Student not found");
                 }
-                const updatedStudent = yield this.studentRepository.udpatePassword(student.id, password);
+                const updatedStudent = yield this.studentRepository.updatePassword(student.id, password);
+                if (!updatedStudent) {
+                    throw new Error("Failed to update password. Please try again.");
+                }
                 return updatedStudent;
             }
             catch (error) {

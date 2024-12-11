@@ -39,7 +39,7 @@ exports.InstructorService = void 0;
 const httpStatusCodes_1 = require("../constants/httpStatusCodes");
 const ErrorHandler_1 = __importDefault(require("../utils/ErrorHandler"));
 const badrequestError_1 = require("../constants/errors/badrequestError");
-const aws_config_1 = __importStar(require("../config/aws.config"));
+const awsS3_config_1 = __importStar(require("../config/awsS3.config"));
 const client_s3_1 = require("@aws-sdk/client-s3");
 const { BAD_REQUEST } = httpStatusCodes_1.STATUS_CODES;
 class InstructorService {
@@ -118,30 +118,24 @@ class InstructorService {
     updateInstructorImage(instructorId, file) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                // Step 1: Find the current profile image of the student
                 const instructor = yield this.InstructorRepository.findInstructorById(instructorId);
-                // Step 2: If there's an existing image, delete it from the S3 bucket
                 if (instructor && instructor.image) {
                     const fileName = decodeURIComponent(instructor.image.split("/").pop().trim());
                     const existingImage = {
-                        Bucket: "synapsebucket-aws", // Your S3 bucket name
-                        Key: `instructor-profile/${fileName}`, // The key (filename) of the existing image
+                        Bucket: "synapsebucket-aws",
+                        Key: `instructor-profile/${fileName}`,
                     };
-                    yield aws_config_1.default.send(new client_s3_1.DeleteObjectCommand(existingImage)); // Delete the existing image
+                    yield awsS3_config_1.default.send(new client_s3_1.DeleteObjectCommand(existingImage));
                 }
-                // Step 3: Prepare the new file for upload
-                const key = `instructor-profile/${file.originalname}`; // The key (filename) for the new image
+                const key = `instructor-profile/${file.originalname}`;
                 const params = {
-                    Bucket: "synapsebucket-aws", // Your S3 bucket name
-                    Key: key, // The new file's key (where it will be saved in S3)
-                    Body: file.buffer, // The file's content (from memory)
-                    ContentType: file.mimetype, // The file's MIME type
+                    Bucket: "synapsebucket-aws",
+                    Key: key,
+                    Body: file.buffer,
+                    ContentType: file.mimetype,
                 };
-                // Step 4: Generate the file URL where the image will be accessible
                 const filePath = `https://${params.Bucket}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${params.Key}`;
-                // Step 5: Upload the file to S3
-                yield aws_config_1.default.send(new client_s3_1.PutObjectCommand(params));
-                // Step 6: Update the student's profile image in the database with the new URL
+                yield awsS3_config_1.default.send(new client_s3_1.PutObjectCommand(params));
                 return yield this.InstructorRepository.updateInstructorImage(instructorId, filePath);
             }
             catch (error) {
@@ -183,7 +177,7 @@ class InstructorService {
                         Bucket: "synapsebucket-aws",
                         Key: `courses/${existingCourse.name.replace(/\s/g, "_")}/image/${fileName}`,
                     };
-                    yield aws_config_1.default.send(new client_s3_1.DeleteObjectCommand(existingImage));
+                    yield awsS3_config_1.default.send(new client_s3_1.DeleteObjectCommand(existingImage));
                 }
                 let filePath;
                 if (file) {
@@ -197,7 +191,7 @@ class InstructorService {
                         ContentType: file.mimetype,
                     };
                     filePath = `https://${params.Bucket}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${params.Key}`;
-                    yield aws_config_1.default.send(new client_s3_1.PutObjectCommand(params));
+                    yield awsS3_config_1.default.send(new client_s3_1.PutObjectCommand(params));
                 }
                 const updatedCourseData = Object.assign(Object.assign({}, courseDetails), { image: filePath || existingCourse.image });
                 return yield this.courseRepository.updateCourse(courseId, updatedCourseData);
@@ -278,12 +272,11 @@ class InstructorService {
                     };
                     const filePath = `https://${params.Bucket}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${params.Key}`;
                     console.log(filePath);
-                    yield aws_config_1.default.send(new client_s3_1.PutObjectCommand(params));
+                    yield awsS3_config_1.default.send(new client_s3_1.PutObjectCommand(params));
                     if (createdCourse.id) {
                         return yield this.courseRepository.addCourseImage(createdCourse.id, filePath);
                     }
                 }
-                // Return the created course without an image if no file was provided
                 return createdCourse;
             }
             catch (error) {
@@ -321,7 +314,7 @@ class InstructorService {
                 if (!module) {
                     throw new badrequestError_1.BadRequestError("Module not found");
                 }
-                const fileKey = yield (0, aws_config_1.uploadToS3)(file);
+                const fileKey = yield (0, awsS3_config_1.uploadToS3)(file);
                 console.log("File key:", fileKey);
                 const videoUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${fileKey}`;
                 chapterData.videoUrl = videoUrl;

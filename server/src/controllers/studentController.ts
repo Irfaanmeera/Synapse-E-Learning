@@ -10,28 +10,34 @@ import { BadRequestError } from "../constants/errors/badrequestError";
 import { ForbiddenError } from "../constants/errors/forbiddenError";
 import { generateToken } from "../utils/generateJWT";
 import UserRole from "../interfaces/entityInterface/IUserRoles";
+import { IOtpService } from "../interfaces/serviceInterfaces/IOtpService";
+import { IStudentService } from "../interfaces/serviceInterfaces/IStudentService";
 
-const { BAD_REQUEST, OK, INTERNAL_SERVER_ERROR } = STATUS_CODES;
+const { OK, INTERNAL_SERVER_ERROR } = STATUS_CODES;
 
-const otpService = new OtpService();
+
 
 export class StudentController {
-  constructor(private studentService: StudentService) {}
+  constructor(
+    private studentService: IStudentService,
+    private otpService: IOtpService
+
+  ) {}
 
   async signup(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { name, email, password, mobile } = req.body;
       const hashedPassword = await bcrypt.hash(password, 10);
-      const studentDetails: IStudent = {
+      const studentDetails = {
         name,
         email,
         password: hashedPassword,
         mobile,
       };
       await this.studentService.signup(studentDetails);
-      const otp = otpService.generateOtp();
-      await otpService.createOtp({ email, otp });
-      otpService.sendOtpMail(email, otp);
+      const otp = this.otpService.generateOtp();
+      await this.otpService.createOtp({ email, otp });
+      this.otpService.sendOtpMail(email, otp);
       res.status(201).json({ message: "OTP sent for verification...", email });
     } catch (error) {
       if (error instanceof Error) {
@@ -46,9 +52,9 @@ export class StudentController {
   async resendOtp(req: Request, res: Response) {
     try {
       const { email } = req.body;
-      const otp = otpService.generateOtp();
-      await otpService.createOtp({ email, otp });
-      otpService.sendOtpMail(email, otp);
+      const otp = this.otpService.generateOtp();
+      await this.otpService.createOtp({ email, otp });
+      this.otpService.sendOtpMail(email, otp);
       res.status(OK).json({ success: true, message: "OTP Resent" });
     } catch (error) {
       console.log(error as Error);
@@ -57,7 +63,7 @@ export class StudentController {
   async verifyOtp(req: Request, res: Response) {
     try {
       const { email, otp } = req.body;
-      const existingOtp = await otpService.findOtp(email);
+      const existingOtp = await this.otpService.findOtp(email);
       if (otp === existingOtp?.otp) {
         const student: IStudent = await this.studentService.verifyStudent(
           email
@@ -116,9 +122,9 @@ export class StudentController {
         }
 
         if (!student.isVerified) {
-          const otp = otpService.generateOtp();
-          await otpService.createOtp({ email, otp });
-          otpService.sendOtpMail(email, otp);
+          const otp = this.otpService.generateOtp();
+          await this.otpService.createOtp({ email, otp });
+          this.otpService.sendOtpMail(email, otp);
           return res.status(400).json({ message: "Not verified" });
         }
 
@@ -224,7 +230,7 @@ export class StudentController {
           Math.random().toString(36).slice(-8);
         const hashedPassword = await bcrypt.hash(generatedPassword, 10);
 
-        const newStudent: IStudent = {
+        const newStudent = {
           name,
           email,
           password: hashedPassword,
@@ -394,8 +400,8 @@ export class StudentController {
       );
 
       return res.status(200).json({
-        courses: result.courses,
-        total: result.total,
+        courses: result!.courses,
+        total: result!.total,
       });
     } catch (error) {
       console.error("Error fetching courses by category:", error);
@@ -480,7 +486,7 @@ export class StudentController {
     try {
       const { otp, email } = req.body;
 
-      const savedOtp = await otpService.findOtp(email);
+      const savedOtp = await this.otpService.findOtp(email);
       if (savedOtp?.otp === otp) {
         res.status(200).json({ success: true });
       } else {

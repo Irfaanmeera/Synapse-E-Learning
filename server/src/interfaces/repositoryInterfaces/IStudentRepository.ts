@@ -7,7 +7,7 @@ export interface IStudentRepository {
   updateUserVerification(email: string): Promise<IStudent>;
   updateStudent(studentData:IStudent):Promise<IStudent>;
   updateImage(studentId:string,image:string):Promise<IStudent>;
-  udpatePassword(studentId: string, password: string): Promise<IStudent | null>;
+  updatePassword(studentId: string, password: string): Promise<IStudent | null>;
   courseEnroll(studentId: string, courseId: string): Promise<IStudent>;
   getAllStudents(): Promise<IStudent[] | null>;
   getStudentCount(): Promise<number>;

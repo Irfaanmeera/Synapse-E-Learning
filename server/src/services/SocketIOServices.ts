@@ -97,8 +97,4 @@ const emitEvent = (eventData: EventData) => {
   io.emit(eventData.event, eventData.data);
 };
 
-// httpServer.listen(4000, () => {
-//   console.log("Socket.IO listening on *:4000");
-// });
-
 export { io, emitEvent };

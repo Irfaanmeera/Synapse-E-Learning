@@ -2,8 +2,9 @@ import express, { Router } from 'express';
 import { InstructorController } from '../controllers/instructorController';
 import { isUserAuth } from '../middlewares/currentUser';
 import { upload } from '../middlewares/multer';
-import { InstructorRepository, CourseRepository, CategoryRepository, ModuleRepository, EnrolledCourseRepository } from '../repositories';
+import { InstructorRepository, CourseRepository, CategoryRepository, ModuleRepository, EnrolledCourseRepository, OtpRepository } from '../repositories';
 import { InstructorService } from '../services/instructorService';
+import { OtpService } from '../services/otpService';
 
 const instructorRouter: Router = express.Router();
 
@@ -12,7 +13,9 @@ const courseRepository = new CourseRepository();
 const categoryRepository = new CategoryRepository();
 const moduleRepository = new ModuleRepository();
 const enrolledCourseRepository = new EnrolledCourseRepository();
+const otpRepository = new OtpRepository()
 
+const otpService = new OtpService(otpRepository)
 const instructorService = new InstructorService(
   instructorRepository,
   courseRepository,
@@ -21,7 +24,7 @@ const instructorService = new InstructorService(
   enrolledCourseRepository
 );
 
-const instructorController = new InstructorController(instructorService);
+const instructorController = new InstructorController(instructorService,otpService);
 
 /* Authentication Routes */
 instructorRouter.post('/signup', (req, res, next) => instructorController.signup(req, res, next));
@@ -44,10 +47,11 @@ instructorRouter.patch('/deleteCourse/:courseId', isUserAuth, (req, res, next) =
 instructorRouter.patch('/listCourse/:courseId', isUserAuth, (req, res, next) => instructorController.listCourse(req, res, next));
 instructorRouter.get('/categories', isUserAuth, (req, res, next) => instructorController.getCategories(req, res, next));
 instructorRouter.post('/createModule', isUserAuth, (req, res, next) => instructorController.createModule(req, res, next));
-instructorRouter.put('/modules/:moduleId', isUserAuth, (req, res, next) => instructorController.updateModule(req, res, next));
-instructorRouter.delete('/modules/:moduleId', isUserAuth, (req, res, next) => instructorController.deleteModule(req, res, next));
 instructorRouter.post('/modules/:moduleId/addChapter', upload.single('video'), isUserAuth, (req, res, next) => instructorController.addChapter(req, res, next));
-
 instructorRouter.get('/getEnrolledStudents', isUserAuth, (req, res, next) => instructorController.getEnrolledCoursesByInstructor(req, res, next));
 
 export default instructorRouter;
+
+
+// instructorRouter.put('/modules/:moduleId', isUserAuth, (req, res, next) => instructorController.updateModule(req, res, next));
+// instructorRouter.delete('/modules/:moduleId', isUserAuth, (req, res, next) => instructorController.deleteModule(req, res, next));

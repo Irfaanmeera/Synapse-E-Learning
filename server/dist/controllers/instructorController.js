@@ -13,7 +13,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InstructorController = void 0;
-const otpService_1 = require("../services/otpService");
 const httpStatusCodes_1 = require("../constants/httpStatusCodes");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const ErrorHandler_1 = __importDefault(require("../utils/ErrorHandler"));
@@ -22,10 +21,10 @@ const forbiddenError_1 = require("../constants/errors/forbiddenError");
 const generateJWT_1 = require("../utils/generateJWT");
 const IUserRoles_1 = __importDefault(require("../interfaces/entityInterface/IUserRoles"));
 const { BAD_REQUEST, OK, INTERNAL_SERVER_ERROR } = httpStatusCodes_1.STATUS_CODES;
-const otpService = new otpService_1.OtpService();
 class InstructorController {
-    constructor(instructorService) {
+    constructor(instructorService, otpService) {
         this.instructorService = instructorService;
+        this.otpService = otpService;
     }
     signup(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -39,9 +38,9 @@ class InstructorController {
                     password: hashedPassword,
                 };
                 yield this.instructorService.signup(instructorData);
-                const otp = otpService.generateOtp();
-                yield otpService.createOtp({ email, otp });
-                otpService.sendOtpMail(email, otp);
+                const otp = this.otpService.generateOtp();
+                yield this.otpService.createOtp({ email, otp });
+                this.otpService.sendOtpMail(email, otp);
                 res
                     .status(OK)
                     .json({ success: true, message: "OTP sent for verification..." });
@@ -58,9 +57,9 @@ class InstructorController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { email } = req.body;
-                const otp = otpService.generateOtp();
-                yield otpService.createOtp({ email, otp });
-                otpService.sendOtpMail(email, otp);
+                const otp = this.otpService.generateOtp();
+                yield this.otpService.createOtp({ email, otp });
+                this.otpService.sendOtpMail(email, otp);
                 res.status(OK).json({ success: true, message: "OTP Resent" });
             }
             catch (error) {
@@ -72,7 +71,7 @@ class InstructorController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { email, otp } = req.body;
-                const existingOtp = yield otpService.findOtp(email);
+                const existingOtp = yield this.otpService.findOtp(email);
                 if (otp === (existingOtp === null || existingOtp === void 0 ? void 0 : existingOtp.otp)) {
                     const instructor = yield this.instructorService.verifyInstructor(email);
                     if (!instructor || !instructor.id) {
@@ -143,9 +142,9 @@ class InstructorController {
                             });
                         }
                         else {
-                            const otp = otpService.generateOtp();
-                            yield otpService.createOtp({ email, otp });
-                            otpService.sendOtpMail(email, otp);
+                            const otp = this.otpService.generateOtp();
+                            yield this.otpService.createOtp({ email, otp });
+                            this.otpService.sendOtpMail(email, otp);
                             throw new ErrorHandler_1.default("Not verified", BAD_REQUEST);
                         }
                     }
@@ -170,7 +169,6 @@ class InstructorController {
                 const id = req.currentUser;
                 const { name, mobile, qualification, description } = req.body;
                 const instructor = yield this.instructorService.updateInstructor({
-                    id,
                     name,
                     mobile,
                     qualification,
@@ -212,7 +210,7 @@ class InstructorController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { otp, email } = req.body;
-                const savedOtp = yield otpService.findOtp(email);
+                const savedOtp = yield this.otpService.findOtp(email);
                 if ((savedOtp === null || savedOtp === void 0 ? void 0 : savedOtp.otp) === otp) {
                     res.status(200).json({ success: true });
                 }
@@ -322,6 +320,9 @@ class InstructorController {
                     category,
                 };
                 const file = req.file ? req.file : undefined;
+                if (!file) {
+                    throw new badrequestError_1.BadRequestError("File not found");
+                }
                 const updatedCourse = yield this.instructorService.updateCourse(courseId, courseDetails, file);
                 res.status(200).json(updatedCourse);
             }
@@ -395,35 +396,32 @@ class InstructorController {
             }
         });
     }
-    updateModule(req, res, next) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const { moduleId } = req.params;
-                const updateData = req.body;
-                const updatedModule = yield this.instructorService.updateModule(moduleId, updateData);
-                res.status(200).json(updatedModule);
-            }
-            catch (error) {
-                if (error instanceof Error) {
-                    next(error);
-                }
-            }
-        });
-    }
-    deleteModule(req, res, next) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const { moduleId } = req.params;
-                yield this.instructorService.deleteModule(moduleId);
-                res.status(200).json({ message: "Module deleted successfully" });
-            }
-            catch (error) {
-                if (error instanceof Error) {
-                    next(error);
-                }
-            }
-        });
-    }
+    // async updateModule(req: Request, res: Response, next: NextFunction) {
+    //   try {
+    //     const { moduleId } = req.params;
+    //     const updateData = req.body;
+    //     const updatedModule = await this.instructorService.updateModule(
+    //       moduleId,
+    //       updateData
+    //     );
+    //     res.status(200).json(updatedModule);
+    //   } catch (error) {
+    //     if (error instanceof Error) {
+    //       next(error);
+    //     }
+    //   }
+    // }
+    // async deleteModule(req: Request, res: Response, next: NextFunction) {
+    //   try {
+    //     const { moduleId } = req.params;
+    //     await this.instructorService.deleteModule(moduleId);
+    //     res.status(200).json({ message: "Module deleted successfully" });
+    //   } catch (error) {
+    //     if (error instanceof Error) {
+    //       next(error);
+    //     }
+    //   }
+    // }
     addChapter(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
             try {

@@ -1,19 +1,12 @@
-import mongoose, { Document, Model } from "mongoose";
+import mongoose, { Document, Model} from "mongoose";
 import { IStudent } from "../interfaces/entityInterface/IStudent";
 
 interface StudentModel extends Model<StudentDoc> {
   build(attrs: IStudent): StudentDoc;
 }
 
-interface StudentDoc extends Document {
-  name: string;
-  email: string;
-  mobile: number;
-  password: string;
-  image?: string;
-  isBlocked?: boolean;
-  wallet?: number;
-  courses?: string[];
+
+interface StudentDoc extends IStudent, Document {
 }
 
 const studentSchema = new mongoose.Schema(
@@ -77,4 +70,4 @@ const Student = mongoose.model<StudentDoc, StudentModel>(
   studentSchema
 );
 
-export { Student };
+export { Student,StudentDoc };

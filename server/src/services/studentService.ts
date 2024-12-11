@@ -215,7 +215,7 @@ export class StudentService implements IStudentService {
   }
   async updatePassword(studentId: string, password: string): Promise<IStudent> {
     try {
-      const updatedStudent = await this.studentRepository.udpatePassword(
+      const updatedStudent = await this.studentRepository.updatePassword(
         studentId,
         password
       );
@@ -239,7 +239,7 @@ export class StudentService implements IStudentService {
       if (!student) {
         throw new BadRequestError("Student not found");
       }
-      const updatedStudent = await this.studentRepository.udpatePassword(
+      const updatedStudent = await this.studentRepository.updatePassword(
         student.id!,
         password
       );

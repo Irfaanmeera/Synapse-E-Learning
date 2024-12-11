@@ -12,7 +12,7 @@ export interface IInstructorRepository {
   findInstructorByEmail(email: string): Promise<IInstructor | null>;
   findInstructorById(instructorId: string): Promise<IInstructor | null>;
   updateInstructorVerification(email: string): Promise<IInstructor>;
-  updateInstructor(instructorData:IInstructor):Promise<IInstructor>;
+  updateInstructor(data: Partial<IInstructor>): Promise<IInstructor>;
   updateInstructorImage(instructorId:string,image:string):Promise<IInstructor>;
   updatePassword(instructorId: string, password: string): Promise<IInstructor>;
   addToWallet(instructorId: string, amount: number): Promise<IInstructor>;

@@ -123,7 +123,11 @@ class AdminService {
     blockStudent(studentId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                return yield this.studentRepository.blockStudent(studentId);
+                const student = yield this.studentRepository.blockStudent(studentId);
+                if (!student) {
+                    throw new ErrorHandler_1.default("Student not found", httpStatusCodes_1.STATUS_CODES.NOT_FOUND);
+                }
+                return student;
             }
             catch (error) {
                 console.error(error);
@@ -134,7 +138,11 @@ class AdminService {
     unblockStudent(studentId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                return yield this.studentRepository.unblockStudent(studentId);
+                const student = yield this.studentRepository.unblockStudent(studentId);
+                if (!student) {
+                    throw new ErrorHandler_1.default("Student not found", httpStatusCodes_1.STATUS_CODES.NOT_FOUND);
+                }
+                return student;
             }
             catch (error) {
                 console.error(error);
@@ -145,7 +153,11 @@ class AdminService {
     blockInstructor(instructorId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                return yield this.instructorRepository.blockInstructor(instructorId);
+                const instructor = yield this.instructorRepository.blockInstructor(instructorId);
+                if (!instructor) {
+                    throw new ErrorHandler_1.default("Instructor not found", httpStatusCodes_1.STATUS_CODES.NOT_FOUND);
+                }
+                return instructor;
             }
             catch (error) {
                 console.error(error);
@@ -156,7 +168,11 @@ class AdminService {
     unblockInstructor(instructorId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                return yield this.instructorRepository.unblockInstructor(instructorId);
+                const instructor = yield this.instructorRepository.unblockInstructor(instructorId);
+                if (!instructor) {
+                    throw new ErrorHandler_1.default("Instructor not found", httpStatusCodes_1.STATUS_CODES.NOT_FOUND);
+                }
+                return instructor;
             }
             catch (error) {
                 console.error(error);

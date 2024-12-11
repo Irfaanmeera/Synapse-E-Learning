@@ -13,12 +13,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OtpService = void 0;
-const otpRepository_1 = require("../repositories/otpRepository");
 const otp_generator_1 = __importDefault(require("otp-generator"));
 const nodemailer_1 = __importDefault(require("nodemailer"));
 class OtpService {
-    constructor() {
-        this.otpRepository = new otpRepository_1.OtpRepository();
+    constructor(otpRepository) {
+        this.otpRepository = otpRepository;
     }
     createOtp(otpData) {
         return __awaiter(this, void 0, void 0, function* () {

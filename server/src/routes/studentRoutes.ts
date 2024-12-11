@@ -9,8 +9,10 @@ import {
   CategoryRepository,
   EnrolledCourseRepository,
   ModuleRepository,
+  OtpRepository,
 } from '../repositories';
 import { StudentService } from '../services/studentService';
+import { OtpService } from '../services/otpService';
 
 const studentRouter: Router = express.Router();
 
@@ -20,6 +22,9 @@ const courseRepository = new CourseRepository();
 const categoryRepository = new CategoryRepository();
 const enrolledCourseRepository = new EnrolledCourseRepository();
 const moduleRepository = new ModuleRepository();
+const otpRepository = new OtpRepository()
+
+const otpService = new OtpService(otpRepository)
 const studentService = new StudentService(
   studentRepository,
   instructorRepository,
@@ -29,7 +34,7 @@ const studentService = new StudentService(
   enrolledCourseRepository
 );
 
-const studentController = new StudentController(studentService);
+const studentController = new StudentController(studentService,otpService);
 
 /* Authentication Routes */
 studentRouter.post('/signup', (req, res, next) => studentController.signup(req, res, next));

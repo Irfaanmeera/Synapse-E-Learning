@@ -11,27 +11,30 @@ import { BadRequestError } from "../constants/errors/badrequestError";
 import { ForbiddenError } from "../constants/errors/forbiddenError";
 import { generateToken } from "../utils/generateJWT";
 import UserRole from "../interfaces/entityInterface/IUserRoles";
+import { IInstructorService } from "../interfaces/serviceInterfaces/IInstructorService";
+import { IOtpService } from "../interfaces/serviceInterfaces/IOtpService";
 
 const { BAD_REQUEST, OK, INTERNAL_SERVER_ERROR } = STATUS_CODES;
 
-const otpService = new OtpService();
-
 export class InstructorController {
-  constructor(private instructorService: InstructorService) { }
+  constructor(
+    private instructorService: IInstructorService,
+    private otpService: IOtpService
+  ) {}
   async signup(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { name, email, mobile, password } = req.body;
       const hashedPassword = await bcrypt.hash(password, 10);
-      const instructorData: IInstructor = {
+      const instructorData = {
         name,
         email,
         mobile,
         password: hashedPassword,
       };
       await this.instructorService.signup(instructorData);
-      const otp = otpService.generateOtp();
-      await otpService.createOtp({ email, otp });
-      otpService.sendOtpMail(email, otp);
+      const otp = this.otpService.generateOtp();
+      await this.otpService.createOtp({ email, otp });
+      this.otpService.sendOtpMail(email, otp);
       res
         .status(OK)
         .json({ success: true, message: "OTP sent for verification..." });
@@ -46,9 +49,9 @@ export class InstructorController {
   async resendOtp(req: Request, res: Response) {
     try {
       const { email } = req.body;
-      const otp = otpService.generateOtp();
-      await otpService.createOtp({ email, otp });
-      otpService.sendOtpMail(email, otp);
+      const otp = this.otpService.generateOtp();
+      await this.otpService.createOtp({ email, otp });
+      this.otpService.sendOtpMail(email, otp);
       res.status(OK).json({ success: true, message: "OTP Resent" });
     } catch (error) {
       console.log(error as Error);
@@ -57,7 +60,7 @@ export class InstructorController {
   async verifyOtp(req: Request, res: Response) {
     try {
       const { email, otp } = req.body;
-      const existingOtp = await otpService.findOtp(email);
+      const existingOtp = await this.otpService.findOtp(email);
       if (otp === existingOtp?.otp) {
         const instructor: IInstructor =
           await this.instructorService.verifyInstructor(email);
@@ -151,9 +154,9 @@ export class InstructorController {
               instructor: instructorData,
             });
           } else {
-            const otp = otpService.generateOtp();
-            await otpService.createOtp({ email, otp });
-            otpService.sendOtpMail(email, otp);
+            const otp = this.otpService.generateOtp();
+            await this.otpService.createOtp({ email, otp });
+            this.otpService.sendOtpMail(email, otp);
             throw new ErrorHandler("Not verified", BAD_REQUEST);
           }
         } else {
@@ -173,7 +176,6 @@ export class InstructorController {
       const id = req.currentUser;
       const { name, mobile, qualification, description } = req.body;
       const instructor = await this.instructorService.updateInstructor({
-        id,
         name,
         mobile,
         qualification,
@@ -217,7 +219,7 @@ export class InstructorController {
   ) {
     try {
       const { otp, email } = req.body;
-      const savedOtp = await otpService.findOtp(email);
+      const savedOtp = await this.otpService.findOtp(email);
       if (savedOtp?.otp === otp) {
         res.status(200).json({ success: true });
       } else {
@@ -323,7 +325,6 @@ export class InstructorController {
       const { courseId } = req.params;
       const { name, description, price, level, category } = req.body;
 
-
       const courseDetails = {
         name,
         description,
@@ -332,16 +333,16 @@ export class InstructorController {
         category,
       };
 
-
       const file = req.file ? req.file : undefined;
 
-
+      if (!file) {
+        throw new BadRequestError("File not found");
+      }
       const updatedCourse = await this.instructorService.updateCourse(
         courseId,
         courseDetails,
         file
       );
-
 
       res.status(200).json(updatedCourse);
     } catch (error) {
@@ -398,7 +399,6 @@ export class InstructorController {
         moduleData.courseId
       );
 
-
       const order = (existingModule?.modules?.length || 0) + 1;
       const module = await this.instructorService.createModule(
         moduleData,
@@ -411,39 +411,38 @@ export class InstructorController {
       }
     }
   }
-  async updateModule(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { moduleId } = req.params;
-      const updateData = req.body;
-      const updatedModule = await this.instructorService.updateModule(
-        moduleId,
-        updateData
-      );
-      res.status(200).json(updatedModule);
-    } catch (error) {
-      if (error instanceof Error) {
-        next(error);
-      }
-    }
-  }
+  // async updateModule(req: Request, res: Response, next: NextFunction) {
+  //   try {
+  //     const { moduleId } = req.params;
+  //     const updateData = req.body;
+  //     const updatedModule = await this.instructorService.updateModule(
+  //       moduleId,
+  //       updateData
+  //     );
+  //     res.status(200).json(updatedModule);
+  //   } catch (error) {
+  //     if (error instanceof Error) {
+  //       next(error);
+  //     }
+  //   }
+  // }
 
-  async deleteModule(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { moduleId } = req.params;
-      await this.instructorService.deleteModule(moduleId);
-      res.status(200).json({ message: "Module deleted successfully" });
-    } catch (error) {
-      if (error instanceof Error) {
-        next(error);
-      }
-    }
-  }
+  // async deleteModule(req: Request, res: Response, next: NextFunction) {
+  //   try {
+  //     const { moduleId } = req.params;
+  //     await this.instructorService.deleteModule(moduleId);
+  //     res.status(200).json({ message: "Module deleted successfully" });
+  //   } catch (error) {
+  //     if (error instanceof Error) {
+  //       next(error);
+  //     }
+  //   }
+  // }
   async addChapter(req: Request, res: Response, next: NextFunction) {
     try {
       const { moduleId } = req.params;
       const chapterData = req.body;
       const file = req.file;
-
 
       const module = await this.instructorService.addChapter(
         moduleId,

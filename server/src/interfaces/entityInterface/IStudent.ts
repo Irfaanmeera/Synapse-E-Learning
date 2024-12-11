@@ -1,15 +1,18 @@
-export interface IStudent {
-    id?: string;
-    name?: string;
-    email?: string;
-    mobile?: number | string;
-    password?: string;
-    image?: string;
-    wallet?: number;
-    isBlocked?: boolean;
-    isVerified?: boolean;
-    courses?: string[];
-  }
+import { Document } from "mongoose";
+
+// Extend IStudent with Document to ensure it has Mongoose document properties
+export interface IStudent extends Document {
+  name?: string;
+  email?: string;
+  mobile?: number | string;
+  password?: string;
+  image?: string;
+  wallet?: number;
+  isBlocked?: boolean;
+  isVerified?: boolean;
+  courses?: string[];
+}
+
 
 export interface IUserAuthResponse {
     status: number;

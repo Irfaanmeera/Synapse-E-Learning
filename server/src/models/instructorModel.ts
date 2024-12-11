@@ -1,23 +1,12 @@
 import mongoose, {Document, Model} from 'mongoose'
-import { IInstructor,Transaction } from "../interfaces/entityInterface/IInstructor";
+import { IInstructor} from "../interfaces/entityInterface/IInstructor";
 
 interface InstructorModel extends Model<InstructorDoc>{
     build(attrs:IInstructor): InstructorDoc;
 }
-interface InstructorDoc extends Document {
-    id?: string;
-    name: string;
-    password: string;
-    email: string;
-    mobile: number;
-    image:string;
-    qualification?: string;
-    isBlocked?: boolean;
-    isVerified?: boolean;
-    wallet?: number;
-    walletHistory?: Transaction[];
-    courses?:string[];
+interface InstructorDoc extends IInstructor, Document {
 }
+
 
 const instructorSchema = new mongoose.Schema(
     {

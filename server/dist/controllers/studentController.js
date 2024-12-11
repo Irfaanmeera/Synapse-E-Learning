@@ -13,7 +13,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.StudentController = void 0;
-const otpService_1 = require("../services/otpService");
 const httpStatusCodes_1 = require("../constants/httpStatusCodes");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
@@ -21,11 +20,11 @@ const badrequestError_1 = require("../constants/errors/badrequestError");
 const forbiddenError_1 = require("../constants/errors/forbiddenError");
 const generateJWT_1 = require("../utils/generateJWT");
 const IUserRoles_1 = __importDefault(require("../interfaces/entityInterface/IUserRoles"));
-const { BAD_REQUEST, OK, INTERNAL_SERVER_ERROR } = httpStatusCodes_1.STATUS_CODES;
-const otpService = new otpService_1.OtpService();
+const { OK, INTERNAL_SERVER_ERROR } = httpStatusCodes_1.STATUS_CODES;
 class StudentController {
-    constructor(studentService) {
+    constructor(studentService, otpService) {
         this.studentService = studentService;
+        this.otpService = otpService;
     }
     signup(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -39,9 +38,9 @@ class StudentController {
                     mobile,
                 };
                 yield this.studentService.signup(studentDetails);
-                const otp = otpService.generateOtp();
-                yield otpService.createOtp({ email, otp });
-                otpService.sendOtpMail(email, otp);
+                const otp = this.otpService.generateOtp();
+                yield this.otpService.createOtp({ email, otp });
+                this.otpService.sendOtpMail(email, otp);
                 res.status(201).json({ message: "OTP sent for verification...", email });
             }
             catch (error) {
@@ -59,9 +58,9 @@ class StudentController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { email } = req.body;
-                const otp = otpService.generateOtp();
-                yield otpService.createOtp({ email, otp });
-                otpService.sendOtpMail(email, otp);
+                const otp = this.otpService.generateOtp();
+                yield this.otpService.createOtp({ email, otp });
+                this.otpService.sendOtpMail(email, otp);
                 res.status(OK).json({ success: true, message: "OTP Resent" });
             }
             catch (error) {
@@ -73,7 +72,7 @@ class StudentController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { email, otp } = req.body;
-                const existingOtp = yield otpService.findOtp(email);
+                const existingOtp = yield this.otpService.findOtp(email);
                 if (otp === (existingOtp === null || existingOtp === void 0 ? void 0 : existingOtp.otp)) {
                     const student = yield this.studentService.verifyStudent(email);
                     if (!student || !student.id) {
@@ -118,9 +117,9 @@ class StudentController {
                         return res.status(400).json({ message: "Incorrect password" });
                     }
                     if (!student.isVerified) {
-                        const otp = otpService.generateOtp();
-                        yield otpService.createOtp({ email, otp });
-                        otpService.sendOtpMail(email, otp);
+                        const otp = this.otpService.generateOtp();
+                        yield this.otpService.createOtp({ email, otp });
+                        this.otpService.sendOtpMail(email, otp);
                         return res.status(400).json({ message: "Not verified" });
                     }
                     if (!student || !student.id) {
@@ -425,7 +424,7 @@ class StudentController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const { otp, email } = req.body;
-                const savedOtp = yield otpService.findOtp(email);
+                const savedOtp = yield this.otpService.findOtp(email);
                 if ((savedOtp === null || savedOtp === void 0 ? void 0 : savedOtp.otp) === otp) {
                     res.status(200).json({ success: true });
                 }
