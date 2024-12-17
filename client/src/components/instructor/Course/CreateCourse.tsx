@@ -225,7 +225,7 @@ const CreateCourse: React.FC = () => {
                 Course Description
               </Typography>
               <Editor
-                apiKey="cpfnjdzxy2x3skaeme2548vxjpeqm5khbh4b3keov8u4eni9"
+                apiKey="iudk1w1kgduly3enyiiplwz3q9763kuikz7zkh59vues5d4l"
                 init={{
                   height: 300,
                   menubar: false,
